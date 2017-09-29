@@ -305,6 +305,7 @@ SET @375G :=3750000; 		--   375 Gold
 SET @500G :=5000000; 		--   500 Gold
 SET @750G :=7500000; 		--   750 Gold
 SET @1000G :=10000000; 		--  1000 Gold
+SET @1250G :=12500000; 		--  1250 Gold
 SET @1500G :=15000000; 		--  1500 Gold
 SET @2500G :=25000000; 		--  2500 Gold
 SET @5000G :=50000000; 		--  5000 Gold
@@ -361,18 +362,18 @@ UPDATE item_template SET sellprice=@10G, buyprice=@10G WHERE entry =  7348; 		--
 UPDATE item_template SET sellprice=@5G, buyprice=@5G WHERE entry =  36019; 			-- Aerie Belt of Nature Protection
 
 -- POLES
-UPDATE item_template SET sellprice=@15000G, buyprice=@15000G WHERE entry = 19970;	-- Arcanite Fishing Pole 
-UPDATE item_template SET sellprice=@15000G, buyprice=@15000G WHERE entry = 44050;	-- Mastercraft Kaluak Fishing Pole 
-UPDATE item_template SET sellprice=@5000G, buyprice=@5000G WHERE entry = 45992;		-- Jeweled Fishing Pole 
-UPDATE item_template SET sellprice=@1000G, buyprice=@1000G WHERE entry = 25978;		-- Seth's Graphite Fishing Pole 
-UPDATE item_template SET sellprice=@500G, buyprice=@500G WHERE entry = 19022;		-- Nat Pagle's Extreme Angler FC-5000
-UPDATE item_template SET sellprice=@2500G, buyprice=@2500G WHERE entry = 45991;		-- Bone Fishing Pole 
-UPDATE item_template SET sellprice=@50G, buyprice=@1500G WHERE entry = 45858;		-- Nat's Lucky Fishing Pole 
+UPDATE item_template SET sellprice=@7500G, buyprice=@15000G WHERE entry = 19970;	-- Arcanite Fishing Pole 
+UPDATE item_template SET sellprice=@7500G, buyprice=@15000G WHERE entry = 44050;	-- Mastercraft Kaluak Fishing Pole 
+UPDATE item_template SET sellprice=@2500G, buyprice=@5000G WHERE entry = 45992;		-- Jeweled Fishing Pole 
+UPDATE item_template SET sellprice=@500G, buyprice=@1000G WHERE entry = 25978;		-- Seth's Graphite Fishing Pole 
+UPDATE item_template SET sellprice=@250G, buyprice=@500G WHERE entry = 19022;		-- Nat Pagle's Extreme Angler FC-5000
+UPDATE item_template SET sellprice=@1250G, buyprice=@2500G WHERE entry = 45991;		-- Bone Fishing Pole 
+UPDATE item_template SET sellprice=@750G, buyprice=@1500G WHERE entry = 45858;		-- Nat's Lucky Fishing Pole 
 UPDATE item_template SET sellprice=@1G, buyprice=@1G WHERE entry = 12225;			-- Blump Family Fishing Pole
-UPDATE item_template SET sellprice=@50G, buyprice=@50G WHERE entry = 6367;			-- Big Iron Fishing Pole
-UPDATE item_template SET sellprice=@5G, buyprice=@5G WHERE entry = 6365;			-- Strong Fishing Pole
+UPDATE item_template SET sellprice=@25G, buyprice=@50G WHERE entry = 6367;			-- Big Iron Fishing Pole
+UPDATE item_template SET sellprice=@1G, buyprice=@5G WHERE entry = 6365;			-- Strong Fishing Pole
 UPDATE item_template SET sellprice=@50G, buyprice=@100G WHERE entry = 6366;			-- Darkwood Fishing Pole
-UPDATE item_template SET sellprice=@50G, buyprice=@25S WHERE entry = 6256;			-- Fishing Pole 
+UPDATE item_template SET sellprice=@5S, buyprice=@25S WHERE entry = 6256;			-- Fishing Pole 
 -- UPDATE item_template SET sellprice=@50G, buyprice=@50G WHERE entry = 45120;		-- Basic Fishing Pole
 
 -- FISHING LINE
