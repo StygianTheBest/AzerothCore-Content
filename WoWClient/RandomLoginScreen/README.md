@@ -16,6 +16,8 @@
     ---
     This is my collectiom of five animated login screens with custom music. A random screen will be chosen each time 
     you launch WoW.
+	
+	Watch the video: https://www.youtube.com/watch?v=tGy4dMr9OhU
     
     
     ### Features ###
@@ -48,7 +50,5 @@
     editing X,Y,Z,O coordinates for each object in x_vars_init.lua. I have included a sample file for 1024x768 resolution 
     as well.
     
-    ~~~~
     			Scale	X	Y	Z	Orientation		Model
         ex: CreateModelFrame(0.05, 	3.17,	1.00,	0.00,	0.00, 	"Spells\\Archimonde_fire.m2")
-    ~~~~
