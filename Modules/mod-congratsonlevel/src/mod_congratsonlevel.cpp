@@ -34,6 +34,7 @@ config file for quick modifications.
 ### Version ###
 ------------------------------------------------------------------------------------------------------------------
 - v2017.08.06 - Release
+- v2017.09.30 - Fix Level Display Bug. Update Strings.
 
 
 ### Credits ###
@@ -224,10 +225,12 @@ public:
             {
                 // Issue a server notification for the player on level up.
                 std::ostringstream ss;
-                ss << "|cffFFFFFF[|cffFF0000 Congrats! |cffFFFFFF] : |cff4CFF00 " << player->GetName() << " |cffFFFFFF has reached level " << player->getLevel() << "!";
+                ss << "|cffFFFFFF[ |cffFF0000C|cffFFA500O|cffFFFF00N|cff00FF00G|cff00FFFFR|cff6A5ACDA|cffFF00FFT|cff98FB98S|cffFF0000! |cffFFFFFF] : |cff4CFF00 " << player->GetName() << " |cffFFFFFFhas reached |cff4CFF00Level " << to_string(player->getLevel()) << "|cffFFFFFF!";
                 sWorld->SendServerMessage(SERVER_MSG_STRING, ss.str().c_str());
                 break;
             }
+            
+            return;
             }
 
             // If level is defined, they hit a reward level.
@@ -235,7 +238,7 @@ public:
             {
                 // Issue a server notification for the player on level up.
                 std::ostringstream ss;
-                ss << "|cffFFFFFF[|cffFF0000 Congrats! |cffFFFFFF] : |cff4CFF00 " << player->GetName() << " |cffFFFFFF has reached level " << level << "!";
+                ss << "|cffFFFFFF[ |cffFF0000C|cffFFA500O|cffFFFF00N|cff00FF00G|cff00FFFFR|cff6A5ACDA|cffFF00FFT|cff98FB98S|cffFF0000! |cffFFFFFF] : |cff4CFF00 " << player->GetName() << " |cffFFFFFFhas reached |cff4CFF00Level " << level << "|cffFFFFFF!";
                 sWorld->SendServerMessage(SERVER_MSG_STRING, ss.str().c_str());
 
                 // Give the items to the player
@@ -250,8 +253,10 @@ public:
 
                 // Issue a raid warning to the player
                 std::ostringstream ss2;
-                ss2 << "Congrats on Level " << level << "! You've been awarded " << money << " gold and a few treasures!";
+                ss2 << "Congrats on Level " << level << " " << player->GetName() << "! You've been awarded " << money << " gold and a few treasures!";
                 player->GetSession()->SendNotification(ss2.str().c_str());
+
+                return;
             }
         }
     }
