@@ -5,6 +5,7 @@
 #### A module for AzerothCore by [StygianTheBest](https://github.com/StygianTheBest/AzerothCore-Content/tree/master/Modules)
 ------------------------------------------------------------------------------------------------------------------
 
+
 ### Description ###
 ------------------------------------------------------------------------------------------------------------------
 WhiteFang is a Beastmaster NPC that howls! This NPC allows any player, or only Hunters, to adopt and use pets. He
@@ -28,8 +29,7 @@ on a Hunter in or out of dungeons.
 
 ### To-Do ###
 ------------------------------------------------------------------------------------------------------------------
-- If possible, create working stable for non-Hunter players
-- Fix pet abilities disappearing on relog/dismiss (Note: they persist if added back)
+- If possible, create working stable for non-Hunter player
 
 
 ### Data ###
@@ -58,6 +58,7 @@ on a Hunter in or out of dungeons.
     - Added Pet: Spore Bat
     - Updated pet models to rare spawn models
 - v2017.09.13 - Teaches additional hunter spells (Eagle Eye, Eyes of the Beast, Beast Lore)
+- v2017.09.30 - Add pet->InitLevelupSpellsForLevel(); recommended by Alistar
 
 
 ### Credits ###
