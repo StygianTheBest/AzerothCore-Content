@@ -30,7 +30,7 @@ on a Hunter in or out of dungeons.
 ### To-Do ###
 ------------------------------------------------------------------------------------------------------------------
 - If possible, create working stable for non-Hunter player
-
+- Fix pet spells disappearing from pet bar on relog/dismiss (Note: they persist if added back)
 
 ### Data ###
 ------------------------------------------------------------------------------------------------------------------
