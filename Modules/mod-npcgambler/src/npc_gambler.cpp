@@ -321,7 +321,8 @@ public:
             uiAdCTimer = 11000;
         }
 
-        void UpdateAI(const uint32 diff)
+        // Speak
+        void UpdateAI(uint32 diff)
         {
 
             if (uiAdATimer <= diff)
@@ -350,7 +351,9 @@ public:
                 uiAdCTimer = 61000;
             }
             else
+            {
                 uiAdCTimer -= diff;
+            }
         }
     };
 
