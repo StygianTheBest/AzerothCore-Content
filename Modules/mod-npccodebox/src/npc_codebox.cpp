@@ -46,7 +46,7 @@ player.
 - Config: Yes
     - Enable Module Announce
 - SQL: Yes
-    - NPC (ID: 601021)
+    - NPC ID: 601021
     - Add Table: lootcode_items (codes, items, charges, etc.)
     - Add Table: lootcode_player (tracks redeemed codes)
 
