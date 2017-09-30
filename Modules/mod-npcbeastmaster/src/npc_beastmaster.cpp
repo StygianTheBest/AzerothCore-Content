@@ -181,6 +181,7 @@ public:
         // Save Pet
         pet->GetCharmInfo()->SetPetNumber(sObjectMgr->GeneratePetNumber(), true);
         player->PetSpellInitialize();
+        pet->InitLevelupSpellsForLevel();
         pet->SavePetToDB(PET_SAVE_AS_CURRENT, 0);
 
         // Learn Hunter Abilities
