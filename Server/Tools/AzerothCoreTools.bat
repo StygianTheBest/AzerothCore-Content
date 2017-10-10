@@ -32,20 +32,30 @@ REM --- Settings ---
 cls
 echo [- Initializing AzerothCore Database Tools -]
 
-REM Check for restoration archives
-IF EXIST %CD%\Tools\restore.zip. (
+REM Check/Remove restoration folders
+IF EXIST %CD%\Tools\restore_custom.zip. (
 	RD /S /Q "Tools\restore_custom\auth"
 	RD /S /Q "Tools\restore_custom\cfg"
 	RD /S /Q "Tools\restore_custom\characters"
 	RD /S /Q "Tools\restore_custom\world"
+	RD /S /Q "Tools\restore_custom"
+	goto removedefault
+) ELSE (
+	goto removedefault
+)
+
+:removedefault
+IF EXIST %CD%\Tools\restore_default.zip. (
 	RD /S /Q "Tools\restore_default\auth"
 	RD /S /Q "Tools\restore_default\cfg"
 	RD /S /Q "Tools\restore_default\characters"
 	RD /S /Q "Tools\restore_default\world"	
+	RD /S /Q "Tools\restore_default"
 	goto init
 ) ELSE (
 	goto init
 )
+
 
 :init
 IF EXIST %CD%\Tools\Backup\NUL (
