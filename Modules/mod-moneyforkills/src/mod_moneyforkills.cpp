@@ -46,7 +46,7 @@ reward range of the group and an option to only reward the player that got the k
 - v2017.08.31 - Added boss kills
 - v2017.09.02 - Added distance check, Fixed group payment
 - v2017.09.22 - Added PVPCorpseLoot as a config option
-
+- v2017.10.11 - Fix typo in color code
 
 ### Credits ###
 ------------------------------------------------------------------------------------------------------------------
@@ -356,7 +356,7 @@ public:
         {
             // Inform the world of the kill
             std::ostringstream sw;
-            sw << "|cffFF0000[cffFFFF00World |cffFF0000]|r:|cff4CFF00 " << player->GetName() << "'s|r group triumphed victoriously over |CFF18BE00[" << killed->GetName() << "]|r !";
+            sw << "|cffFF0000[ |cffFFFF00World |cffFF0000]|r:|cff4CFF00 " << player->GetName() << "'s|r group triumphed victoriously over |CFF18BE00[" << killed->GetName() << "]|r !";
             sWorld->SendServerMessage(SERVER_MSG_STRING, sw.str().c_str());
 
             // Inform the player of the bounty
