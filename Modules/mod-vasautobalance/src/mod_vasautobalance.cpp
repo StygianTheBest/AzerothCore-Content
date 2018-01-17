@@ -137,13 +137,12 @@ public:
 		: PlayerScript("VAS_AutoBalance_PlayerScript")
 	{
 	}
-
-	void OnLogin(Player *Player)
+	// Announce Module
+	void OnLogin(Player *player)
 	{
 		if (sConfigMgr->GetBoolDefault("VAS.Announce", true))
 		{
-			//ChatHandler(Player->GetSession()).PSendSysMessage("This server is running a VAS_AutoBalance Module.");
-			ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00VASAutobalance |rmodule.");
+			ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00VASautobalance |rmodule.");
 		}
 	}
 };
