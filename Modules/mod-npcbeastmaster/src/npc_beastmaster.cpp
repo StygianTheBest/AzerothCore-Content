@@ -86,14 +86,7 @@ on a Hunter in or out of dungeons.
 #include "Config.h"
 #include "Pet.h"
 #include "ScriptPCH.h"
-#include "Configuration/Config.h"
 #include "ScriptedGossip.h"
-
-std::vector<uint32> HunterSpells = { 883, 982, 2641, 6991, 33976, 1002, 1462, 6197 };
-bool BeastMasterAnnounceToPlayer;
-bool BeastMasterHunterOnly;
-bool BeastMasterExoticNoSpec;
-uint32 BeastMasterPetScale;
 
 class BeastMasterAnnounce : public PlayerScript
 {
@@ -105,7 +98,7 @@ public:
     void OnLogin(Player* player)
     {
         // Announce Module
-        if (BeastMasterAnnounceToPlayer)
+        if (sConfigMgr->GetBoolDefault("BeastMasterNPC.Announce", true))
         {
             ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00BeastMasterNPC |rmodule");
         }
@@ -121,9 +114,11 @@ public:
 
     void CreatePet(Player *player, Creature * m_creature, uint32 entry)
     {
+        // Get Pet Scale from config
+        const float PetScale = sConfigMgr->GetFloatDefault("BeastMaster.PetScale", 1.0);
 
         // If enabled for Hunters only..
-        if (BeastMasterHunterOnly)
+        if (sConfigMgr->GetBoolDefault("BeastMaster.HunterOnly", true))
         {
             if (player->getClass() != CLASS_HUNTER)
             {
@@ -179,7 +174,7 @@ public:
         }
 
         // Scale Pet
-        pet->SetObjectScale(BeastMasterPetScale);
+        pet->SetObjectScale(PetScale);
 
         // Caster Pets?
         player->SetMinion(pet, true);
@@ -195,8 +190,14 @@ public:
         if (!player->HasSpell(6197))
         {
             // player->learnSpell(13481);	// Tame Beast - Not working for non-hunter classes
-            for (int i = 0; i < HunterSpells.size(); ++i)
-                player->learnSpell(HunterSpells[i]);
+            player->learnSpell(883);	// Call Pet
+            player->learnSpell(982);	// Revive Pet
+            player->learnSpell(2641);	// Dismiss Pet
+            player->learnSpell(6991);	// Feed Pet
+            player->learnSpell(33976);	// Mend Pet	
+            player->learnSpell(1002);	// Eyes of the Beast
+            player->learnSpell(1462);	// Beast Lore
+            player->learnSpell(6197);	// Eagle Eye
         }
 
         // Farewell
@@ -213,7 +214,7 @@ public:
         m_creature->HandleEmoteCommand(EMOTE_ONESHOT_ROAR);
 
         // If enabled for Hunters only..
-        if (BeastMasterHunterOnly)
+        if (sConfigMgr->GetBoolDefault("BeastMaster.HunterOnly", true))
         {
             if (player->getClass() != CLASS_HUNTER)
             {
@@ -228,19 +229,24 @@ public:
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Browse Pets", GOSSIP_SENDER_MAIN, 51);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Browse Rare Pets", GOSSIP_SENDER_MAIN, 54);
 
-        // Allow Exotic Pets For hunters if they can tame
-        if (!BeastMasterExoticNoSpec && player->getClass() == CLASS_HUNTER && player->HasSpell(53270))
+        // Allow Exotic Pets regardless of spec
+        if (sConfigMgr->GetBoolDefault("BeastMaster.ExoticNoSpec", true))
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Browse Exotic Pets", GOSSIP_SENDER_MAIN, 53);
         }
-
-        // Allow Exotic Pets regardless of spec
-        if (BeastMasterExoticNoSpec)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Browse Exotic Pets", GOSSIP_SENDER_MAIN, 53);
+        else
+        {
+            if (player->CanTameExoticPets())
+            {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Browse Exotic Pets", GOSSIP_SENDER_MAIN, 53);
+            }
+        }
 
         // Stables for hunters only - Doesn't seem to work for other classes
         if (player->getClass() == CLASS_HUNTER)
+        {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Visit Stable", GOSSIP_SENDER_MAIN, GOSSIP_OPTION_STABLEPET);
+        }
 
         // Pet Food Vendor
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Buy Pet Food", GOSSIP_SENDER_MAIN, GOSSIP_OPTION_VENDOR);
@@ -259,22 +265,31 @@ public:
 
         switch (action)
         {
+
             // MAIN MENU
         case 50:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Browse Pets", GOSSIP_SENDER_MAIN, 51);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Browse Rare Pets", GOSSIP_SENDER_MAIN, 54);
 
             // Allow Exotics for all players
-            // Allow Exotic Pets regardless of spec
-            if (!BeastMasterExoticNoSpec && player->getClass() == CLASS_HUNTER && player->HasSpell(53270))
+            if (sConfigMgr->GetBoolDefault("BeastMaster.ExoticNoSpec", true))
+            {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Browse Exotic Pets", GOSSIP_SENDER_MAIN, 53);
-
-            if (BeastMasterExoticNoSpec)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Browse Exotic Pets", GOSSIP_SENDER_MAIN, 53);
+            }
+            else
+            {
+                // Allow Exotics only for Hunters with Beast Mastery
+                if (player->CanTameExoticPets())
+                {
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Browse Exotic Pets", GOSSIP_SENDER_MAIN, 53);
+                }
+            }
 
             // Stables for hunters only - Doesn't seem to work for other classes
             if (player->getClass() == CLASS_HUNTER)
+            {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Visit Stable", GOSSIP_SENDER_MAIN, GOSSIP_OPTION_STABLEPET);
+            }
 
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Buy Pet Food", GOSSIP_SENDER_MAIN, GOSSIP_OPTION_VENDOR);
             player->PlayerTalkClass->SendGossipMenu(100001, m_creature->GetGUID());
@@ -284,19 +299,19 @@ public:
         case 51:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TALK, "Back..", GOSSIP_SENDER_MAIN, 50);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "Next..", GOSSIP_SENDER_MAIN, 52);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Bat", GOSSIP_SENDER_MAIN, 16180);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Bear", GOSSIP_SENDER_MAIN, 12037);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Boar", GOSSIP_SENDER_MAIN, 29996);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Cat", GOSSIP_SENDER_MAIN, 2175);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Carrion Bird", GOSSIP_SENDER_MAIN, 2931);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Crab", GOSSIP_SENDER_MAIN, 18241);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Crocolisk", GOSSIP_SENDER_MAIN, 1417);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Bat", GOSSIP_SENDER_MAIN, 1);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Bear", GOSSIP_SENDER_MAIN, 2);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Boar", GOSSIP_SENDER_MAIN, 300);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Cat", GOSSIP_SENDER_MAIN, 4);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Carrion Bird", GOSSIP_SENDER_MAIN, 5);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Crab", GOSSIP_SENDER_MAIN, 6);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Crocolisk", GOSSIP_SENDER_MAIN, 7);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Dragonhawk", GOSSIP_SENDER_MAIN, 8);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Gorilla", GOSSIP_SENDER_MAIN, 1559);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Hound", GOSSIP_SENDER_MAIN, 29452);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Hyena", GOSSIP_SENDER_MAIN, 5829);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Moth", GOSSIP_SENDER_MAIN, 25498);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Nether Ray", GOSSIP_SENDER_MAIN, 18285);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Gorilla", GOSSIP_SENDER_MAIN, 9);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Hound", GOSSIP_SENDER_MAIN, 10);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Hyena", GOSSIP_SENDER_MAIN, 11);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Moth", GOSSIP_SENDER_MAIN, 12);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Nether Ray", GOSSIP_SENDER_MAIN, 13);
             player->PlayerTalkClass->SendGossipMenu(100002, m_creature->GetGUID());
             break;
 
@@ -304,19 +319,19 @@ public:
         case 52:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TALK, "Back..", GOSSIP_SENDER_MAIN, 50);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "Previous..", GOSSIP_SENDER_MAIN, 51);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Owl", GOSSIP_SENDER_MAIN, 14343);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Raptor", GOSSIP_SENDER_MAIN, 9684);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Ravager", GOSSIP_SENDER_MAIN, 22123);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Scorpid", GOSSIP_SENDER_MAIN, 14476);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Serpent", GOSSIP_SENDER_MAIN, 28011);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Spider", GOSSIP_SENDER_MAIN, 12433);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Spore Bat", GOSSIP_SENDER_MAIN, 18280);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Tallstrider", GOSSIP_SENDER_MAIN, 22807);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Turtle", GOSSIP_SENDER_MAIN, 14223);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Warp Stalker", GOSSIP_SENDER_MAIN, 23163);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Wasp", GOSSIP_SENDER_MAIN, 18283);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Wind Serpent", GOSSIP_SENDER_MAIN, 5834);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Wolf", GOSSIP_SENDER_MAIN, 3825);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Owl", GOSSIP_SENDER_MAIN, 140);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Raptor", GOSSIP_SENDER_MAIN, 15);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Ravager", GOSSIP_SENDER_MAIN, 16);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Scorpid", GOSSIP_SENDER_MAIN, 17);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Serpent", GOSSIP_SENDER_MAIN, 18);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Spider", GOSSIP_SENDER_MAIN, 19);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Spore Bat", GOSSIP_SENDER_MAIN, 20);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Tallstrider", GOSSIP_SENDER_MAIN, 21);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Turtle", GOSSIP_SENDER_MAIN, 22);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Warp Stalker", GOSSIP_SENDER_MAIN, 23);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Wasp", GOSSIP_SENDER_MAIN, 24);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Wind Serpent", GOSSIP_SENDER_MAIN, 25);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Wolf", GOSSIP_SENDER_MAIN, 26);
             player->PlayerTalkClass->SendGossipMenu(100003, m_creature->GetGUID());
             break;
 
@@ -333,24 +348,24 @@ public:
             }
 
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TALK, "Back..", GOSSIP_SENDER_MAIN, 50);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Chimaera", GOSSIP_SENDER_MAIN, 20932);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Core Hound", GOSSIP_SENDER_MAIN, 11671);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Devilsaur", GOSSIP_SENDER_MAIN, 32485);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Rhino", GOSSIP_SENDER_MAIN, 25487);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Silithid", GOSSIP_SENDER_MAIN, 6582);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Jormungar Worm", GOSSIP_SENDER_MAIN, 26360);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Arcturis (Spirit Bear)", GOSSIP_SENDER_MAIN, 38453);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Gondria (Spirit Tiger)", GOSSIP_SENDER_MAIN, 33776);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Loque'nahak (Spirit Leopard)", GOSSIP_SENDER_MAIN, 32517);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Skoll (Spirit Worg)", GOSSIP_SENDER_MAIN, 35189);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Chimaera", GOSSIP_SENDER_MAIN, 27);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Core Hound", GOSSIP_SENDER_MAIN, 28);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Devilsaur", GOSSIP_SENDER_MAIN, 29);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Rhino", GOSSIP_SENDER_MAIN, 30);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Silithid", GOSSIP_SENDER_MAIN, 31);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Jormungar Worm", GOSSIP_SENDER_MAIN, 32);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Arcturis (Spirit Bear)", GOSSIP_SENDER_MAIN, 33);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Gondria (Spirit Tiger)", GOSSIP_SENDER_MAIN, 34);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Loque'nahak (Spirit Leopard)", GOSSIP_SENDER_MAIN, 35);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Skoll (Spirit Worg)", GOSSIP_SENDER_MAIN, 36);
             player->PlayerTalkClass->SendGossipMenu(100003, m_creature->GetGUID());
             break;
 
             // RARE PETS
         case 54:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TALK, "Back..", GOSSIP_SENDER_MAIN, 50);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Mazzranache (Tallstrider)", GOSSIP_SENDER_MAIN, 3068);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Aotona (Bird)", GOSSIP_SENDER_MAIN, 32481);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Mazzranache (Tallstrider)", GOSSIP_SENDER_MAIN, 37);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Aotona (Bird)", GOSSIP_SENDER_MAIN, 38);
             player->PlayerTalkClass->SendGossipMenu(100004, m_creature->GetGUID());
             break;
 
@@ -363,42 +378,167 @@ public:
         case GOSSIP_OPTION_VENDOR:
             player->GetSession()->SendListInventory(m_creature->GetGUID());
             break;
+
+            // BEASTS
+        case 1: // Bat (Shadikith The Glider)
+            CreatePet(player, m_creature, 16180);
+            break;
+
+        case 2: // Bear (Ursollok)
+            CreatePet(player, m_creature, 12037);
+            break;
+
+        case 300: // Boar (Armored Brown)
+            CreatePet(player, m_creature, 29996);
+            break;
+
+        case 4: // Cat (Shadowclaw)
+            CreatePet(player, m_creature, 2175);
+            break;
+
+        case 5: // Carrion Bird (Zaricotl)
+            CreatePet(player, m_creature, 2931);
+            break;
+
+        case 6: // Crab (Crusty)
+            CreatePet(player, m_creature, 18241);
+            break;
+
+        case 7: // Crocolisk (Izod Green)
+            CreatePet(player, m_creature, 1417);
+            break;
+
+        case 8: // Dragonhawk (Bloodfalcon)
+            CreatePet(player, m_creature, 18155);
+            break;
+
+        case 9: // Gorilla (King Mukla)
+            CreatePet(player, m_creature, 1559);
+            break;
+
+        case 10: // Hound (Darkhound - Registers as Wolf Pre-Cata)
+            CreatePet(player, m_creature, 29452);
+            break;
+
+        case 11: // Hyena (Snort the Heckler)
+            CreatePet(player, m_creature, 5829);
+            break;
+
+        case 12: // Moth (Aspatha the Broodmother)
+            CreatePet(player, m_creature, 25498);
+            break;
+
+        case 13: // Nether Ray (Count Ungula)
+            CreatePet(player, m_creature, 18285);
+            break;
+
+        case 140:  // Owl (Olm the Wise)
+            CreatePet(player, m_creature, 14343);
+            break;
+
+        case 15: // Raptor (Lar'korwi)
+            CreatePet(player, m_creature, 9684);
+            break;
+
+        case 16: // Ravager (Rip-blade Ravager)
+            CreatePet(player, m_creature, 22123);
+            break;
+
+        case 17: // Scorpid (Krellak)
+            CreatePet(player, m_creature, 14476);
+            break;
+
+        case 18: // Serpent (Emperor Cobra)
+            CreatePet(player, m_creature, 28011);
+            break;
+
+        case 19: // Spider (Krethis the Shadowspinner)
+            CreatePet(player, m_creature, 12433);
+            break;
+
+        case 20: // Spore Bat (Sporewing)
+            CreatePet(player, m_creature, 18280);
+            break;
+
+        case 21: // TallStrider (Green/Purple)
+            CreatePet(player, m_creature, 22807);
+            break;
+
+        case 22: // Turtle (Cranky Benj)
+            CreatePet(player, m_creature, 14223);
+            break;
+
+        case 23: // WarpStalker (Gezzarak the Huntress)
+            CreatePet(player, m_creature, 23163);
+            break;
+
+        case 24: // Wasp (Blacksting)
+            CreatePet(player, m_creature, 18283);
+            break;
+
+        case 25: // Wind Serpent (Azzere the Skyblade)
+            CreatePet(player, m_creature, 5834);
+            break;
+
+        case 26: // Wolf (Ghostpaw Alpha)
+            CreatePet(player, m_creature, 3825);
+            break;
+
+        case 27: // Exotic: Chimaera (Nuramoc)
+            CreatePet(player, m_creature, 20932);
+            break;
+
+        case 28: // Exotic: Core Hound (Lava/Fire) (21108 - Fel/Fire)
+            CreatePet(player, m_creature, 11671);
+            break;
+
+        case 29: // Exotic: Devilsaur (King Krush)
+            CreatePet(player, m_creature, 32485);
+            break;
+
+        case 30: // Rhino (Wooly Rhino Matriarch Brown)
+            CreatePet(player, m_creature, 25487);
+            break;
+
+        case 31: // Exotic: Silithid (Clutchmother Zavas)
+            CreatePet(player, m_creature, 6582);
+            break;
+
+        case 32: // Exotic: Worm (Rattlebore)
+            CreatePet(player, m_creature, 26360);
+            break;
+
+        case 33: // Exotic Spirit: Bear (Arcturis)
+            CreatePet(player, m_creature, 38453);
+            break;
+
+        case 34: // Exotic Spirit: Night Saber (Gondria)
+            CreatePet(player, m_creature, 33776);
+            break;
+
+        case 35: // Exotic Spirit: Leopard (Loque'nahak)
+            CreatePet(player, m_creature, 32517);
+            break;
+
+        case 36: // Exotic Sprit: Worg (Skoll)
+            CreatePet(player, m_creature, 35189);
+            break;
+
+        case 37: // Rare: Tallstrider (Mazzranache)
+            CreatePet(player, m_creature, 3068);
+            break;
+
+        case 38: // Rare: Bird of Prey (Aotona)
+            CreatePet(player, m_creature, 32481);
+            break;
         }
 
-        // BEASTS
-        if (action > 1000)
-            CreatePet(player, m_creature, action);
         return true;
-    }
-};
-
-class BeastMasterConf : public WorldScript
-{
-public:
-    BeastMasterConf() : WorldScript("BeastMasterConf") { }
-
-    void OnBeforeConfigLoad(bool reload) override
-    {
-        if (!reload) {
-            std::string cfg_file = "npc_beastmaster.conf";
-            std::string cfg_def_file = cfg_file + ".dist";
-
-            sConfigMgr->LoadMore(cfg_def_file.c_str());
-
-            sConfigMgr->LoadMore(cfg_file.c_str());
-
-            BeastMasterAnnounceToPlayer = sConfigMgr->GetBoolDefault("BeastMaster.Announce", true);
-            BeastMasterHunterOnly = sConfigMgr->GetBoolDefault("BeastMaster.HunterOnly", true);
-            BeastMasterExoticNoSpec = sConfigMgr->GetBoolDefault("BeastMaster.ExoticNoSpec", true);
-            BeastMasterPetScale = sConfigMgr->GetIntDefault("BeastMaster.PetScale", 1);
-
-        }
     }
 };
 
 void AddBeastMasterScripts()
 {
-    new BeastMasterConf();
     new BeastMasterAnnounce();
     new BeastMaster();
 }
