@@ -16,6 +16,7 @@ CREATE TABLE `lootcode_items` (
   `name` varchar(255) DEFAULT NULL,
   `quantity` int(14) NOT NULL DEFAULT '1',
   `gold` int(14) unsigned DEFAULT NULL,
+  `customize` int(14) unsigned DEFAULT '0',
   `charges` tinyint(5) DEFAULT '1',
   `isUnique` tinyint(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
@@ -24,11 +25,11 @@ CREATE TABLE `lootcode_items` (
 -- ----------------------------
 -- Records of lootcode_items
 -- ----------------------------
-INSERT INTO `lootcode_items` VALUES ('1', 'sixbags', '21841', 'Netherweave Bag', '6', '0', '2', '0');
-INSERT INTO `lootcode_items` VALUES ('2', 'artifact', '4696', 'Lapidis Tankard of Tidesippe', '1', '5', '3', '0');
-INSERT INTO `lootcode_items` VALUES ('3', 'ballroom', '3419', 'Red Rose', '1', '100', '3', '0');
-INSERT INTO `lootcode_items` VALUES ('4', 'ballroom', '6833', 'Tuxedo Shirt', '1', '0', '3', '0');
-INSERT INTO `lootcode_items` VALUES ('5', 'ballroom', '6835', 'Tuxedo Pants', '1', '0', '3', '0');
+INSERT INTO `lootcode_items` VALUES ('1', 'sixbags', '21841', 'Netherweave Bag', '6', '0', '0', '2', '0');
+INSERT INTO `lootcode_items` VALUES ('2', 'artifact', '4696', 'Lapidis Tankard of Tidesippe', '1', '5', '0', '3', '0');
+INSERT INTO `lootcode_items` VALUES ('3', 'ballroom', '3419', 'Red Rose', '1', '100', '0', '3', '0');
+INSERT INTO `lootcode_items` VALUES ('4', 'ballroom', '6833', 'Tuxedo Shirt', '1', '0', '0', '3', '0');
+INSERT INTO `lootcode_items` VALUES ('5', 'ballroom', '6835', 'Tuxedo Pants', '1', '0', '0', '3', '0');
 
 -- ----------------------------
 -- Table structure for lootcode_player
@@ -74,3 +75,9 @@ INSERT INTO creature_template (entry, modelid1, name, subname, IconName, gossip_
 -- NPC Text
 DELETE FROM `npc_text` WHERE `ID`=@Entry;
 INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES (@Entry, 'Greetings $N. Do you have a loot code to redeem?');
+DELETE FROM `npc_text` WHERE `ID`=@Entry+1;
+INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES (@Entry+1, 'GM # Add Loot Code');
+DELETE FROM `npc_text` WHERE `ID`=@Entry+18;
+INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES (@Entry+18, 'GM # Delete Loot Code');
+DELETE FROM `npc_text` WHERE `ID`=@Entry+28;
+INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES (@Entry+28, 'Showing the list of all loot codes');
